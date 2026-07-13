@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Compartmentalized Digital Identity – Reference Architecture</title>
+<style>
+  :root{
+    --ink:#232321; --muted:#6b6a64; --faint:#9a998f;
+    --paper:#f6f4ee; --card:#ffffff; --line:#e2ded3;
+    --cit:#185FA5; --cit-bg:#E6F1FB;   /* Citizen   blue  */
+    --com:#BA7517; --com-bg:#FAEEDA;   /* Commerce  amber */
+    --prv:#0F6E56; --prv-bg:#E1F5EE;   /* Private   teal  */
+    --wrk:#6b6a64; --wrk-bg:#efece4;   /* Work      grey  */
+    --soc:#993556; --soc-bg:#FBEAF0;   /* Social    pink  */
+    --root:#534AB7; --root-bg:#EEEDFE; /* Root      purple*/
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--paper);color:var(--ink);font-family:var(--sans);
+       -webkit-font-smoothing:antialiased;padding:30px 26px 40px}
+  .wrap{max-width:1400px;margin:0 auto}
+  .eyebrow{font-size:11px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:var(--faint);margin-bottom:6px}
+  h1{font-size:22px;font-weight:600;margin:0 0 5px;letter-spacing:.2px}
+  .sub{font-size:13px;color:var(--muted);margin:0 0 22px;max-width:1040px;line-height:1.55}
+  .sub b{color:var(--ink);font-weight:600}
+
+  .grid{display:grid;grid-template-columns:230px repeat(3,1fr);gap:14px;align-items:start}
+  .col{display:flex;flex-direction:column;gap:12px}
+  .coltag{font-size:11px;font-weight:700;letter-spacing:1.1px;text-transform:uppercase;color:var(--faint);padding:0 2px 2px}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;
+        padding:12px 14px;box-shadow:0 1px 2px rgba(40,36,25,.04)}
+  .card.tinted{border-width:1px}
+  .card .hd{font-size:13.5px;font-weight:600;margin:0 0 3px;display:flex;align-items:center;gap:7px}
+  .card .role{font-size:10.5px;color:var(--faint);font-weight:500;margin:0 0 7px;letter-spacing:.2px}
+  .card ul{margin:0;padding:0;list-style:none}
+  .card li{font-size:11.5px;line-height:1.5;color:var(--muted);position:relative;padding-left:12px;margin:1px 0}
+  .card li::before{content:"";position:absolute;left:0;top:8px;width:4px;height:4px;border-radius:50%;background:var(--faint)}
+  .mono{font-family:var(--mono);color:var(--ink);font-size:10.6px}
+  .dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex:none}
+  .t-cit{background:var(--cit)} .t-com{background:var(--com)} .t-prv{background:var(--prv)}
+  .t-wrk{background:var(--wrk)} .t-soc{background:var(--soc)} .t-root{background:var(--root)}
+
+  .b-cit{border-color:var(--cit)} .b-com{border-color:var(--com)}
+  .b-prv{border-color:var(--prv)} .b-soc{border-color:var(--soc)}
+
+  .badges{display:flex;gap:5px;flex-wrap:wrap;margin-top:9px}
+  .bdg{font-size:10px;font-weight:600;letter-spacing:.2px;padding:2px 8px;border-radius:20px;
+       border:1px solid var(--line);color:var(--muted);background:#faf9f5;white-space:nowrap}
+  .bdg.k{color:var(--root);border-color:#CECBF6;background:var(--root-bg)}
+
+  .band{margin-top:16px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .band .hd{font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--faint);margin:0 0 10px}
+  .flows{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .flow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:11.5px;color:var(--muted)}
+  .chip{font-size:11px;font-weight:600;padding:4px 10px;border-radius:8px;border:1px solid var(--line);background:#faf9f5;color:var(--ink)}
+  .chip.cit{background:var(--cit-bg);border-color:#C3DCF3;color:var(--cit)}
+  .chip.prv{background:var(--prv-bg);border-color:#BFE6D7;color:var(--prv)}
+  .arr{color:var(--faint);font-weight:700}
+
+  .legend{margin-top:18px;display:flex;flex-wrap:wrap;gap:10px 22px;font-size:12px;color:var(--muted);align-items:center}
+  .legend .g{display:flex;align-items:center;gap:7px}
+  .note{margin-top:14px;font-size:12px;color:var(--muted);line-height:1.6;max-width:1080px}
+  .note b{color:var(--ink);font-weight:600}
+  .rule{font-size:11px;color:var(--soc);font-weight:600}
+  .tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:2px 0 14px}
+  .tier{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 13px}
+  .tier.here{border-color:#BFE6D7;box-shadow:0 0 0 2px var(--prv-bg)}
+  .tier-hd{font-size:12px;color:var(--muted);margin:0 0 9px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .tno{font-weight:700;color:var(--ink);font-size:12.5px}
+  .youare{font-size:9px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--prv);background:var(--prv-bg);border:1px solid #BFE6D7;border-radius:20px;padding:1px 7px}
+  .shape{height:60px;display:flex;align-items:center;gap:9px}
+  .blob{width:42px;height:42px;border-radius:11px;background:#cbc8be}
+  .phone{width:50px;height:58px;border:2px solid var(--faint);border-radius:9px;padding:5px;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:4px}
+  .phone.sm{width:44px;height:52px}
+  .phone2{width:38px;height:52px;border:2px solid var(--prv);border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
+  .q{border-radius:3px}
+  .q1{background:var(--cit)} .q2{background:var(--com)} .q3{background:var(--soc)} .q4{background:var(--prv)}
+  .phone2 .q4{width:20px;height:20px;border-radius:4px}
+  .plus{color:var(--faint);font-weight:700;font-size:15px}
+  .tor{font-size:7.5px;font-weight:700;color:var(--prv);letter-spacing:.3px}
+  .tier-cap{font-size:10.5px;color:var(--faint);margin-top:8px;line-height:1.4}
+  .tiernote{font-size:12px;color:var(--muted);margin:0 0 18px}
+  .tiernote b{color:var(--ink)}
+  .hpill{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:#fff;background:#3a3a37;border-radius:20px;padding:2px 7px;margin-left:auto}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">Reference architecture &middot; the Balanced tier</div>
+  <h1>Compartmentalized Digital Identity</h1>
+  <p class="sub"><b>Private</b> is the only compartment sealed on every axis. Inside the <b>Main profile</b>, Citizen, Commerce, and Social are separated by disclosure discipline, not hard walls: they share the main VPN and functional-browser fingerprint, and Commerce and Social also share the Bulk vault and the everything-else SIM. The left column is the shared root of trust; each compartment's badges show what seals it. Generic example, not a real person.</p>
+
+  <div class="tiers">
+    <div class="tier">
+      <div class="tier-hd"><span class="tno">Baseline</span> one identity, less tracking</div>
+      <div class="shape"><span class="blob"></span></div>
+      <div class="tier-cap">No real separation, a different and simpler shape. Not detailed below.</div>
+    </div>
+    <div class="tier here">
+      <div class="tier-hd"><span class="tno">Balanced</span> four compartments, one phone <span class="youare">you are here</span></div>
+      <div class="shape"><div class="phone"><span class="q q1"></span><span class="q q2"></span><span class="q q3"></span><span class="q q4"></span></div></div>
+      <div class="tier-cap">The architecture detailed on this page.</div>
+    </div>
+    <div class="tier">
+      <div class="tier-hd"><span class="tno">Hardened</span> Private on its own device</div>
+      <div class="shape"><div class="phone sm"><span class="q q1"></span><span class="q q2"></span><span class="q q3"></span></div><span class="plus">+</span><div class="phone2"><span class="q q4"></span><span class="tor">Tor</span></div></div>
+      <div class="tier-cap">Same as Balanced, but the Private box moves out.</div>
+    </div>
+  </div>
+  <p class="tiernote">Pick the lowest tier that meets your need and stop. <b>Baseline</b> is a different, lighter shape; <b>Balanced</b> is the full model shown here; <b>Hardened</b> is Balanced plus a dedicated Private device.</p>
+
+  <div class="grid">
+
+    <!-- ROOT OF TRUST -->
+    <div class="col">
+      <div class="coltag">Root of trust</div>
+      <div class="card">
+        <p class="hd"><span class="dot t-root"></span>Hardware key &times;2</p>
+        <p class="role">phishing-resistant 2FA</p>
+        <ul>
+          <li>Two PIN-set keys, enrolled alike, stored apart</li>
+          <li>Guards the Core vault + crown-jewel logins</li>
+          <li>Paper recovery in a safe (root identity only)</li>
+        </ul>
+      </div>
+      <div class="card">
+        <p class="hd"><span class="dot t-root"></span>Authenticator app</p>
+        <p class="role">offline, no cloud account</p>
+        <ul>
+          <li>Holds the Core vault's 2FA (cross-2FA)</li>
+          <li>Manual backup to a second device</li>
+        </ul>
+      </div>
+      <div class="card">
+        <p class="hd"><span class="dot t-root"></span>Core password manager</p>
+        <p class="role">the personal-side seal</p>
+        <ul>
+          <li>Unlocked by hardware key + authenticator</li>
+          <li>Holds Citizen logins only</li>
+        </ul>
+      </div>
+      <div class="card">
+        <p class="hd"><span class="dot t-root"></span>Two SIMs</p>
+        <p class="role">registered numbers, split by exposure</p>
+        <ul>
+          <li><b>SIM A</b> &rarr; Citizen (bank, eID, 2FA)</li>
+          <li><b>SIM B</b> &rarr; Commerce / everything-else</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- CITIZEN -->
+    <div class="col">
+      <div class="coltag" style="color:var(--cit)">Main profile &middot; Citizen + Social</div>
+      <div class="card tinted b-cit">
+        <p class="hd"><span class="dot t-cit"></span>Government &amp; finance</p>
+        <p class="role">disclosure: full (name, address, ID)</p>
+        <ul>
+          <li>eID, tax, government services</li>
+          <li>Banks &amp; finance, one alias per institution</li>
+          <li>Primary email on your own domain</li>
+          <li>Device / OS accounts (burned by design)</li>
+        </ul>
+        <div class="badges">
+          <span class="bdg k">Core vault</span>
+          <span class="bdg k">hardware 2FA</span>
+          <span class="bdg">SIM A</span>
+          <span class="bdg">main VPN (neutral)</span>
+        </div>
+      </div>
+      <div class="card tinted b-soc">
+        <p class="hd"><span class="dot t-soc"></span>Social &middot; burned</p>
+        <p class="role">quarantined in Main, assume fully exposed</p>
+        <ul>
+          <li>Facebook, Instagram, TikTok, <b>LinkedIn</b></li>
+          <li>Mega-marketplaces (Amazon): burned, account-identified</li>
+          <li>No native apps (Balanced+): web-in-browser only</li>
+          <li>Contacts + location permission denied</li>
+        </ul>
+        <div class="badges">
+          <span class="bdg">Bulk vault</span>
+          <span class="bdg">SIM B</span>
+          <span class="bdg">main VPN</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMMERCE -->
+    <div class="col">
+      <div class="coltag" style="color:var(--com)">Main profile &middot; Commerce (discipline)</div>
+      <div class="card tinted b-com">
+        <p class="hd"><span class="dot t-com"></span>The disclosure ladder</p>
+        <p class="role">reveal only what each merchant forces</p>
+        <ul>
+          <li><b>Named delivery:</b> real name + address, virtual card, alias email</li>
+          <li><b>Paid-pseudonymous:</b> virtual card, parcel locker, alias</li>
+          <li><b>Alias-only:</b> burner email, no ID, no payment</li>
+          <li><b>Ignore:</b> disposable alias, fake info</li>
+        </ul>
+        <div class="badges">
+          <span class="bdg">Bulk vault</span>
+          <span class="bdg">app 2FA</span>
+          <span class="bdg">SIM B</span>
+          <span class="bdg">main VPN</span>
+        </div>
+      </div>
+      <div class="card">
+        <p class="hd"><span class="dot t-com"></span>Payments buffer</p>
+        <p class="role">limit commerce exposure, not the state</p>
+        <ul>
+          <li><span class="mono">salary bank &rarr; virtual card &rarr; wallet / PayPal</span></li>
+          <li>Merchant sees a token, never your bank</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- PRIVATE -->
+    <div class="col">
+      <div class="coltag" style="color:var(--prv)">Private profile &middot; sealed, zero identifiers</div>
+      <div class="card tinted b-prv">
+        <p class="hd"><span class="dot t-prv"></span>The unlinkable compartment</p>
+        <p class="role">disclosure: none, never touches the rest</p>
+        <ul>
+          <li>Journal / health (E2E notes)</li>
+          <li>Anonymous research &amp; browsing</li>
+          <li>Metadata-minimal messenger (username, or no-number app)</li>
+          <li>Own pseudonymous vault (not legal-you)</li>
+        </ul>
+        <div class="badges">
+          <span class="bdg">Private vault</span>
+          <span class="bdg">hardened browser</span>
+          <span class="bdg">own VPN + Tor</span>
+          <span class="bdg">encrypted at rest, PIN</span>
+          <span class="bdg">Hardened: own phone + line</span>
+        </div>
+      </div>
+      <div class="card tinted b-prv">
+        <p class="hd"><span class="dot t-prv"></span>Hardened tier <span class="hpill">Hardened only</span></p>
+        <p class="role">the strongest split</p>
+        <ul>
+          <li>Its own de-Googled phone (GrapheneOS)</li>
+          <li>Never runs banking or eID</li>
+          <li>Not co-carried with the Citizen device</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- EGRESS BAND -->
+  <div class="band">
+    <p class="hd">Egress &middot; smart, not blanket</p>
+    <div class="flows">
+      <div class="flow">
+        <span class="chip">All apps &middot; before any VPN</span><span class="arr">&rarr;</span>
+        <span class="chip">Private DNS over TLS (system-wide)</span>
+        <span style="flex-basis:100%;font-size:11px">Hardened: Quad9 &middot; Baseline/Balanced: Cloudflare for Families or NextDNS (encrypted DNS + malware/adware filtering for every app)</span>
+      </div>
+      <div class="flow">
+        <span class="chip cit">Main profile</span><span class="arr">&rarr;</span>
+        <span class="chip">VPN A (split-tunnel)</span><span class="arr">&rarr;</span>
+        <span class="chip">Internet</span>
+        <span style="flex-basis:100%;font-size:11px">bank / eID excluded (direct); everything else tunnelled</span>
+      </div>
+      <div class="flow">
+        <span class="chip prv">Private profile</span><span class="arr">&rarr;</span>
+        <span class="chip">VPN B (anonymous, always-on, kill switch)</span><span class="arr">&rarr;</span>
+        <span class="chip">Tor</span><span class="arr">&rarr;</span>
+        <span class="chip">Internet</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="legend">
+    <div class="g"><span class="dot t-root"></span> Root of trust (shared)</div>
+    <div class="g"><span class="dot t-cit"></span> Citizen (accepted)</div>
+    <div class="g"><span class="dot t-com"></span> Commerce (minimize)</div>
+    <div class="g"><span class="dot t-prv"></span> Private (blind)</div>
+    <div class="g"><span class="dot t-soc"></span> Social (burned)</div>
+    <div class="g"><span class="bdg k">badge</span> what seals the compartment</div>
+  </div>
+
+  <p class="note">The real invariant: <span class="rule">no attribute crosses between the Main side, the Private side, and Work.</span> Within Main, Citizen, Commerce, and Social are separated by disclosure discipline, not walls, so they can share the Bulk vault, the everything-else SIM, and the main VPN; only the <b>Private</b> profile is sealed on every axis (own vault, browser, egress, and VPN or Tor). <b>Work</b> is a fourth, employer-controlled profile, left out of this picture because it is not yours to design.</p>
+</div>
+</body>
+</html>
